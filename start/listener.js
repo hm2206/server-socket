@@ -1,6 +1,4 @@
 const Event = require('../core/event');
 
-
-Event.on('hello_world', ({ data }) => {
-    console.log(data);
-});
+// Notificaciones
+Event.on('NotificationListener.store', 'NotificationListener.store');

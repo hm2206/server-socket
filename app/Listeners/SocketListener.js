@@ -1,11 +1,12 @@
 'use strict';
 
-const socketConnect = ({ io, socket }) => {
-    console.log('connect');
+const socketConnect = ({ connection, socket, request, auth }) => {
+    // añadir connecion al cliente
+    socket.join(auth.user.username);
 }
 
-const socketDisconnect = ({ io, socket }) => {
-    console.log('disconnect');
+const socketDisconnect = ({ connection, socket, auth }) => {
+    console.log(`client desconectado ${socket.id}`);
 }
 
 

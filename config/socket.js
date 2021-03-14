@@ -25,4 +25,9 @@ module.exports = {
      */
     socketDisconnect: socketDisconnect,
 
+    /**
+     * Configuracion de la ruta de los Eventos
+     */
+     pathEvents: '../app/Events/',
+
 };

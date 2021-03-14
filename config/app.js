@@ -14,5 +14,23 @@ module.exports = {
      */
     origin: false,
 
+    /**
+     * Métodos permitidos
+     */
+    methods: ['GET', 'POST'],
+
+    /**
+     * Cabezeras permitidas
+     */
+    allowedHeaders: [
+        "Authorization",
+        "ClientId",
+        "ClientSecret"
+    ],
+
+    /**
+     * habilitar credentials
+     */
+    credentials: true,
 
 };

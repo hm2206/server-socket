@@ -17,7 +17,14 @@ class Server {
         this.server = http.createServer(this.app);
 
         // Configuración de sockets
-        this.io = socketIo(this.server);
+        this.io = socketIo(this.server, {
+            cors: {
+                origin:  configApp.origin,
+                methods: configApp.methods,
+                allowedHeaders: configApp.allowedHeaders,
+                credentials: configApp.credentials,
+            }
+        });
 
     }
 

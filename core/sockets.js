@@ -1,19 +1,23 @@
 
+const path = require('path');
 const ConfigSocket = require('../config/socket');
 const Event = require('./event');
-
+const Request = require('./request');
+const Auth = require('./auth');
 
 class Sockets {
 
     constructor(io) {
         this.io = io;
+        // request
+        this.request = null;
         // executar socket events
         this.socketEvents();
     }
 
     socketEvents () {  
         // importar eventos
-        require(ConfigSocket.path);  
+        require(ConfigSocket.path); 
         // executar socket root
         this._execute(this.io, Event.listOn, ConfigSocket.socketConnect, ConfigSocket.socketDisconnect);
         // executar namespaces
@@ -28,35 +32,72 @@ class Sockets {
         });
     }
 
-    async _execute (connection, events = [], onConnect = null, onDisconnect = null) {
+    _execute (connection, events = [], onConnect = null, onDisconnect = null) {
         // executar connection
-        connection.on('connection', async (socket) => {
-            // handle connection
-            if (typeof onConnect == 'function') onConnect({ 
-                connection,
-                socket,
-                date: new Date
-            });
-            // execute events
-            events.filter(evt => {
-                socket.on(evt.name, async (data) => {
-                    await evt.handle({
-                        connection, 
-                        socket,
-                        date: new Date,
-                        data
+        connection.on('connection', (socket) => {
+            // handle request
+            this.request = new Request(socket.request, socket.handshake);
+            this.auth = new Auth(this.request);
+            // simplificar
+            let request = this.request;
+            let auth = this.auth;
+            // proceso de socket 
+            try {
+                // validar authentication
+                auth.verify();
+                // add event
+                connection.event = async (handle) => {
+                    await this.event(handle, { name: handle, connection, socket, request, auth, date: new Date });
+                }
+                // handle connection
+                this.connect({ connection, socket, request, auth, onConnect });
+                // execute events
+                events.filter(evt => {
+                    let newName = evt.name;
+                    socket.on(newName, async (data) => {
+                        let resolver = await evt.handle({ connection, socket, auth, date: new Date, data });
                     });
                 });
-            });
-            // desconectar socket
-            socket.on('disconnect', () => {
-                // handle disconnection
-                if (typeof onDisconnect == 'function') onDisconnect({ 
-                    connection,
-                    socket,
-                    date: new Date
+                // desconectar socket
+                socket.on('disconnect', () => {
+                    this.disconnect({ connection, socket, request, auth, onDisconnect })
                 });
-            })
+            } catch (error) {
+                // desconectar socket por error
+                socket.disconnect(true);
+                this.disconnect({ connection, socket, request, auth, onDisconnect });
+            }   
+        });
+    }
+
+    async event (handle = "", payload = {}) {
+        if (typeof handle != 'string') throw new Error("El handle debe ser de tipo string");
+        let [className, method] = handle.split('.');
+        let ControllerEvent = require(path.resolve(__dirname, ConfigSocket.pathEvents, className)); 
+        let resolveEvent = new ControllerEvent();
+        handle = resolveEvent[method];
+        if (typeof handle != 'function') throw new Error(`No se encontró el handle ${handle}`);
+        // executar evento
+        return handle(payload);
+    }
+
+    connect ({ connection, socket, request, auth, onConnect }) {
+        if (typeof onConnect == 'function') onConnect({ 
+            connection,
+            socket,
+            request,
+            auth,
+            date: new Date
+        });
+    }
+
+    disconnect ({ connection, socket, request, auth, onDisconnect = null }) {
+        if (typeof onDisconnect == 'function') onDisconnect({ 
+            connection,
+            socket,
+            request,
+            auth,
+            date: new Date
         });
     }
 
