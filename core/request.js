@@ -33,6 +33,14 @@ class Request {
         return this.cookies()[name] || value;
     }
 
+    auths () {
+        return this.handshake.auth;
+    }
+
+    auth (name) {
+        return this.auths()[name] || undefined;
+    }
+
 }
 
 module.exports = Request;

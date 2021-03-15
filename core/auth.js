@@ -16,8 +16,7 @@ class Auth {
     }
 
     async initializar () {
-        this.authentication.config(getClient(this.request));
-        this.authentication.config(getAuthorization(this.request));
+        this.authentication.config(this.request.auths());
     }
 
     async verify (socket, callback = null) {
