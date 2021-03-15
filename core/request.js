@@ -10,7 +10,7 @@ class Request {
     }
 
     headers () {
-        return this.request.headers;
+        return this.handshake.headers;
     }
 
     header (name) {
