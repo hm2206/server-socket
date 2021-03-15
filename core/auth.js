@@ -34,7 +34,7 @@ class Auth {
             })
         });
         // validar logueo
-        if (!success) return callback({ message, socket });
+        if (!success) return callback({ message, socket, request: this.request });
         // add
         this.logged = success;
         this.user = user;

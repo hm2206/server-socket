@@ -11,8 +11,10 @@ const socketDisconnect = ({ connection, socket, auth }) => {
 }
 
 
-const socketError = ({ message, socket }) => {
+const socketError = ({ message, socket, request }) => {
     console.log(`socket denegado ${socket.id}, message => ${message}`);
+    console.log(`headers: ${request.headers()}`);
+    socket.disconnect();
 }
 
 
