@@ -10,6 +10,8 @@ class NotificationListener {
         let { receive } = data;
         // emitir evento al receptor
         connection.to(receive.username).emit('NotificationListener.store', data);
+        // cerrar conexíon
+        socket.disconnect();
     }
 
 }
