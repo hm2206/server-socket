@@ -1,6 +1,6 @@
 'use strict';
 
-const { socketConnect, socketDisconnect } = require('../app/Listeners/SocketListener');
+const { socketConnect, socketDisconnect, socketError } = require('../app/Listeners/SocketListener');
 
 // exportar configuración
 module.exports = {
@@ -24,6 +24,11 @@ module.exports = {
      * Callback de desconexión de socket
      */
     socketDisconnect: socketDisconnect,
+
+    /**
+     * Callback de error de socket
+     */
+     socketError: socketError,
 
     /**
      * Configuracion de la ruta de los Eventos

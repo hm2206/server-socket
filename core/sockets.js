@@ -21,8 +21,8 @@ class Sockets {
         this.io.use(async (socket, next) => {
             this.request = new Request(socket.request, socket.handshake);
             this.auth = new Auth(this.request);
-            await this.auth.verify(socket);
-            next();
+            await this.auth.verify(socket, ConfigSocket.socketError);
+            if (this.auth.logged) next();
         });
     }
 
