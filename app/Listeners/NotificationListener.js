@@ -6,10 +6,10 @@ class NotificationListener {
         
     }
 
-    store = ({ connection, socket, request, data }) => {
+    store = async ({ connection, socket, request, data, auth }) => {
         let { receive } = data;
         // emitir evento al receptor
-        connection.of(receive.username).emit('NotificationListener.store');
+        connection.to(receive.username).emit('NotificationListener.store', data);
     }
 
 }

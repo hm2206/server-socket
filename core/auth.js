@@ -20,21 +20,20 @@ class Auth {
         this.authentication.config(getAuthorization(this.request));
     }
 
-    async verify () {
+    async verify (socket) {
         let { success, message, user } = await this.authentication.get(`me`)
         .then(res =>  res.data)
         .catch(err => {
-            let { data } = err.response;
             return ({
                 success: false,
                 status: data.status || 401,
                 code: err.code || 'ERR_AUTHORIZATION',
                 user: {},
-                message: data.message || err.message
+                message: err.message
             })
         });
         // validar logueo
-        if (!success) throw new Error(message);
+        if (!success) socket.disconnect(true);
         // add
         this.logged = success;
         this.user = user;

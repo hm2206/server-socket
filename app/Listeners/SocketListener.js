@@ -1,6 +1,6 @@
 'use strict';
 
-const socketConnect = ({ connection, socket, request, auth }) => {
+const socketConnect = async ({ connection, socket, request, auth }) => {
     // añadir connecion al cliente
     socket.join(auth.user.username);
 }

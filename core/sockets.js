@@ -11,11 +11,24 @@ class Sockets {
         this.io = io;
         // request
         this.request = null;
+        // auth
+        this.auth = null;
         // executar socket events
         this.socketEvents();
     }
 
-    socketEvents () {  
+    middleware () {
+        this.io.use(async (socket, next) => {
+            this.request = new Request(socket.request, socket.handshake);
+            this.auth = new Auth(this.request);
+            await this.auth.verify(socket);
+            next();
+        });
+    }
+
+    async socketEvents () {  
+        // executar middlewares
+        await this.middleware();
         // importar eventos
         require(ConfigSocket.path); 
         // executar socket root
@@ -34,28 +47,23 @@ class Sockets {
 
     _execute (connection, events = [], onConnect = null, onDisconnect = null) {
         // executar connection
-        connection.on('connection', (socket) => {
-            // handle request
-            this.request = new Request(socket.request, socket.handshake);
-            this.auth = new Auth(this.request);
+        connection.on('connection', async (socket) => {
             // simplificar
             let request = this.request;
             let auth = this.auth;
             // proceso de socket 
             try {
-                // validar authentication
-                auth.verify();
                 // add event
                 connection.event = async (handle) => {
                     await this.event(handle, { name: handle, connection, socket, request, auth, date: new Date });
                 }
                 // handle connection
-                this.connect({ connection, socket, request, auth, onConnect });
+                await this.connect({ connection, socket, request, auth, onConnect });
                 // execute events
                 events.filter(evt => {
                     let newName = evt.name;
                     socket.on(newName, async (data) => {
-                        let resolver = await evt.handle({ connection, socket, auth, date: new Date, data });
+                        let resolver = await evt.handle({ connection, socket, auth: this.auth, date: new Date, data });
                     });
                 });
                 // desconectar socket
