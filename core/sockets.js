@@ -22,8 +22,9 @@ class Sockets {
             this.request = new Request(socket.request, socket.handshake);
             this.auth = new Auth(this.request);
             await this.auth.verify(socket, ConfigSocket.socketError);
-            if (this.auth.logged) next();
             console.log(this.auth.logged);
+            if (this.auth.logged) next();
+            else next(new Error("not authorized"));
         });
     }
 
