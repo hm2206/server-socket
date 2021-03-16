@@ -12,7 +12,7 @@ module.exports = {
     /**
      * Configurar cors
      */
-    origin: false,
+    origin: '*',
 
     /**
      * Métodos permitidos

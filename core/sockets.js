@@ -23,6 +23,7 @@ class Sockets {
             this.auth = new Auth(this.request);
             await this.auth.verify(socket, ConfigSocket.socketError);
             if (this.auth.logged) next();
+            console.log(this.auth.logged);
         });
     }
 
