@@ -68,7 +68,7 @@ class Event {
     // callback de conexión
     disconnect = (handle = "") => {
         let handleTemp = this._getHandle(handle);
-        return handleTemp;
+        this._onDisconnect = handleTemp;
     }
 
 }

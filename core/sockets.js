@@ -17,25 +17,24 @@ class Sockets {
         this.socketEvents();
     }
 
-    middleware () {
-        this.io.use(async (socket, next) => {
+    async middleware (connection) {
+        await connection.use(async (socket, next) => {
             this.request = new Request(socket.request, socket.handshake);
-            this.auth = new Auth(this.request);
-            await this.auth.verify(socket, ConfigSocket.socketError);
-            if (this.auth.logged) next();
-            else next(new Error("not authorized"));
+            let auth = new Auth(this.request);
+            await auth.verify(socket, ConfigSocket.socketError);
+            this.auth = auth;
+            if (auth.logged) next();
+            else  next(new Error("not authorized"));
         });
     }
 
     async socketEvents () {  
-        // executar middlewares
-        await this.middleware();
         // importar eventos
         require(ConfigSocket.path); 
         // executar socket root
         this._execute(this.io, Event.listOn, ConfigSocket.socketConnect, ConfigSocket.socketDisconnect);
         // executar namespaces
-        Object.keys(Event.listNamespace).filter(async name => {
+        await Object.keys(Event.listNamespace).filter(async name => {
             let newConnection = this.io.of(name);
             let namespace = Event.listNamespace[name] || {};
             let events = namespace.events || [];
@@ -47,6 +46,8 @@ class Sockets {
     }
 
     _execute (connection, events = [], onConnect = null, onDisconnect = null) {
+        // executar middlewares
+        this.middleware(connection);
         // executar connection
         connection.on('connection', async (socket) => {
             // simplificar
@@ -68,7 +69,7 @@ class Sockets {
                     });
                 });
                 // desconectar socket
-                socket.on('disconnect', () => {
+                socket.on('disconnect', async () => {
                     this.disconnect({ connection, socket, request, auth, onDisconnect })
                 });
             } catch (error) {

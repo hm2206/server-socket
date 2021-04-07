@@ -35,7 +35,7 @@ class Auth {
         // validar logueo
         if (!success) return callback({ message, socket, request: this.request });
         // add
-        this.logged = success;
+        this.logged = true;
         this.user = user;
     }
 
